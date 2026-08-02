@@ -69,8 +69,11 @@
     <div class="card">
       <h3>✉️ Correos Autorizados</h3>
       <div id="emailsList"></div>
-      <div class="add-row">
-        <input type="email" id="newEmail" placeholder="nuevo_correo@gmail.com">
+      <div class="add-row" style="flex-wrap:wrap">
+        <input type="email" id="newEmail" placeholder="nuevo_correo@gmail.com" style="flex:2">
+        <input type="text" id="newProfileName" placeholder="Nombre del perfil" style="flex:1">
+        <input type="text" id="newProfileAvatar" placeholder="Avatar (emoji)" style="width:70px;flex:none">
+        <input type="password" id="newProfilePin" placeholder="PIN" maxlength="4" style="width:70px;flex:none">
         <button onclick="agregarCorreo()">Agregar</button>
       </div>
     </div>
@@ -170,14 +173,24 @@
 
   async function agregarCorreo() {
     const email = document.getElementById('newEmail').value;
-    if (!email) return;
+    const profileName = document.getElementById('newProfileName').value;
+    const avatar = document.getElementById('newProfileAvatar').value;
+    const pin = document.getElementById('newProfilePin').value;
+    if (!email || !profileName) {
+      alert('El correo y el nombre del perfil son obligatorios');
+      return;
+    }
     try {
-      await authFetch('/api/admin/emails', {
+      await authFetch('/api/admin/emails-with-profile', {
         method: 'POST',
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, profileName, avatar, pin: pin || undefined })
       });
       document.getElementById('newEmail').value = '';
+      document.getElementById('newProfileName').value = '';
+      document.getElementById('newProfileAvatar').value = '';
+      document.getElementById('newProfilePin').value = '';
       cargarCorreos();
+      cargarPerfiles();
     } catch (err) {
       alert('Error: ' + err.message);
     }
@@ -185,3 +198,4 @@
 </script>
 </body>
 </html>
+
