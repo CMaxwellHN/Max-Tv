@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaxTV — Versión Final Completa</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06060f;
+  --surface:#0c0c1e;
+  --border:#181830;
+  --text:#dce8ff;
+  --muted:#4a5a7a;
+  --accent:#00c8ff;
+  --accent2:#7b2fff;
+  --yes:#00e093;
+  --no:#ff4466;
+  --anime:#ff8c00;
+  --adult:#ff2266;
+  --gold:#ffc800;
+}
+body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);padding:28px 14px 80px}
+
+/* ─── PAGE HEADER ─── */
+.page-header{text-align:center;margin-bottom:44px}
+.page-eyebrow{font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.8rem,8vw,5.5rem);letter-spacing:.04em;line-height:1;background:linear-gradient(135deg,#00c8ff 0%,#ffffff 45%,#7b2fff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-sub{font-size:.65rem;color:var(--muted);margin-top:10px;line-height:1.7}
+
+/* ─── ADDED FEATURES BANNER ─── */
+.features-banner{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:8px;margin-bottom:44px;
+}
+.feat-item{
+  padding:10px 14px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:8px;
+}
+.feat-icon{font-size:.9rem;flex-shrink:0;margin-top:1px}
+.feat-content{}
+.feat-title{font-size:.58rem;font-weight:700;margin-bottom:2px}
+.feat-desc{font-size:.48rem;color:var(--muted);line-height:1.4}
+.feat-new{display:inline-block;padding:1px 5px;border-radius:3px;background:rgba(0,224,147,.12);color:var(--yes);font-size:.38rem;font-weight:700;letter-spacing:.08em;margin-left:4px;vertical-align:middle}
+
+/* ─── SECTION ─── */
+.section{margin-bottom:48px}
+.sec-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.sec-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0}
+.sec-title{font-size:.9rem;font-weight:700}
+.sec-desc{font-size:.58rem;color:var(--muted);margin-top:2px;line-height:1.5}
+
+/* ─── SCREEN WRAPPER ─── */
+.screen{width:100%;max-width:960px;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);position:relative}
+.screen-note{font-size:10px;color:#2a2a40;margin-top:8px;text-align:center;letter-spacing:.05em}
+
+/* ─── BASE ─── */
+.app{width:100%;height:100%;background:linear-gradient(160deg,#05050e 0%,#0a0a1c 50%,#05050e 100%);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.glow-1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,200,255,.06),transparent 65%);top:-150px;left:-120px;pointer-events:none}
+.glow-2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(123,47,255,.05),transparent 65%);bottom:-100px;right:-100px;pointer-events:none}
+.glow-3{position:absolute;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(255,140,0,.03),transparent 65%);top:40%;left:40%;pointer-events:none}
+
+/* ─── TOPBAR ─── */
+.tb{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:rgba(0,0,0,.6);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;position:relative;z-index:10}
+.tb-logo{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.06em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tb-nav{display:flex;gap:2px}
+.tn{padding:3px 7px;border-radius:4px;font-size:.42rem;font-weight:500;color:rgba(255,255,255,.32);cursor:pointer;transition:all .2s;letter-spacing:.02em}
+.tn.a{background:rgba(0,200,255,.1);color:#fff;border:1px solid rgba(0,200,255,.18)}
+.tn.anime{color:var(--anime);border:1px solid rgba(255,140,0,.15);background:rgba(255,140,0,.06)}
+.tn.adult{color:var(--adult);border:1px solid rgba(255,34,102,.15);background:rgba(255,34,102,.06)}
+.tn.fav{color:var(--gold)}
+.tb-right{display:flex;align-items:center;gap:5px}
+.tb-icon{width:22px;height:22px;border-radius:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:.48rem;cursor:pointer;position:relative}
+.tb-notif-dot{position:absolute;top:-2px;right:-2px;width:6px;height:6px;border-radius:50%;background:#ff2244;border:1px solid var(--bg)}
+.tb-user{display:flex;align-items:center;gap:4px;padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);cursor:pointer}
+.tb-user-av{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.38rem;font-weight:700}
+.tb-user-name{font-size:.4rem;color:rgba(255,255,255,.5)}
+.tb-clock{font-family:'JetBrains Mono',monospace;font-size:.45rem;color:rgba(255,255,255,.25);letter-spacing:.05em;padding-left:6px;border-left:1px solid rgba(255,255,255,.06)}
+
+/* ─── HERO ─── */
+.hero{padding:8px 16px;flex-shrink:0;position:relative;z-index:1}
+.hero-inner{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:rgba(0,200,255,.04);border:1px solid rgba(0,200,255,.08);position:relative;overflow:hidden}
+.hero-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,.3),transparent)}
+.hero-thumb{width:86px;height:54px;border-radius:7px;background:linear-gradient(135deg,#0d1a2a,#0a1020);border:1px solid rgba(0,200,255,.12);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;position:relative;overflow:hidden}
+.hero-live-badge{position:absolute;top:4px;left:4px;padding:1px 5px;border-radius:2px;background:#ff2244;font-size:.3rem;font-weight:700;letter-spacing:.06em}
+.hero-4k{position:absolute;bottom:4px;right:4px;padding:1px 4px;border-radius:2px;background:rgba(0,200,255,.2);border:1px solid rgba(0,200,255,.3);font-size:.3rem;font-weight:700;color:var(--accent)}
+.hero-info{flex:1;min-width:0}
+.h-badge{display:inline-block;padding:2px 6px;border-radius:3px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:.35rem;font-weight:700;letter-spacing:.1em;margin-bottom:3px}
+.h-title{font-size:.75rem;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-meta{font-size:.38rem;color:rgba(255,255,255,.35);margin-bottom:5px}
+.h-btns{display:flex;gap:4px;flex-wrap:wrap}
+.h-btn{padding:4px 10px;border-radius:5px;font-size:.4rem;font-weight:700;cursor:pointer}
+.h-play{background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 2px 10px rgba(0,200,255,.2)}
+.h-info-b{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.6)}
+.h-pip{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:rgba(255,255,255,.4)}
+.h-cast{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.15);color:var(--accent)}
+.hero-stats{text-align:right;flex-shrink:0}
+.hs-time{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--accent);display:block}
+.hs-label{font-size:.32rem;color:var(--muted);display:block;margin-bottom:4px}
+.hs-viewers{font-size:.35rem;color:rgba(255,255,255,.2)}
+
+/* ─── CONTENT ROWS ─── */
+.content{flex:1;overflow:hidden;padding:6px 0;position:relative;z-index:1;display:flex;flex-direction:column;gap:0}
+.row-s{padding:0 16px 7px}
+.rt{font-size:.41rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.26);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.rt-left{display:flex;align-items:center;gap:4px}
+.rt-left::before{content:'';width:2px;height:7px;border-radius:1px;background:linear-gradient(180deg,var(--accent),var(--accent2));display:block}
+.rt-more{font-size:.34rem;color:rgba(0,200,255,.35);cursor:pointer}
+.cards{display:flex;gap:5px;overflow:hidden}
+
+/* ─── CHANNEL CARD ─── */
+.cc{flex-shrink:0;width:108px;border-radius:7px;background:linear-gradient(135deg,#0a0a1c,#0f0f24);border:1px solid rgba(255,255,255,.05);overflow:hidden;cursor:pointer}
+.cc.fc{border-color:rgba(0,200,255,.5);box-shadow:0 0 14px rgba(0,200,255,.18)}
+.cc-top{height:56px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0c1420,#181d30);position:relative;font-size:.65rem;font-weight:800}
+.cc-live{position:absolute;top:3px;left:3px;padding:1px 4px;border-radius:2px;background:#ff2244;font-size:.3rem;font-weight:700}
+.cc-hd{position:absolute;top:3px;right:3px;padding:1px 4px;border-radius:2px;background:rgba(0,200,255,.2);border:1px solid rgba(0,200,255,.3);font-size:.3rem;font-weight:700;color:var(--accent)}
+.cc-prog-bar{height:2px;background:rgba(255,255,255,.06)}.cc-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.cc-info{padding:5px 6px}
+.cc-name{font-size:.46rem;font-weight:700;margin-bottom:1px}
+.cc-show{font-size:.35rem;color:rgba(255,255,255,.32);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-time{font-size:.32rem;color:rgba(255,255,255,.2);margin-top:1px;display:flex;align-items:center;gap:2px}
+
+/* ─── MOVIE CARD ─── */
+.mc{flex-shrink:0;width:70px;border-radius:7px;background:linear-gradient(135deg,#0a0a1c,#0f0f24);border:1px solid rgba(255,255,255,.05);overflow:hidden;cursor:pointer}
+.mc.fmc{border-color:rgba(0,200,255,.5);box-shadow:0 0 12px rgba(0,200,255,.18)}
+.mc-top{height:92px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0c1420,#181d30);position:relative;font-size:1.1rem}
+.mc-q{position:absolute;top:3px;right:3px;padding:1px 4px;border-radius:2px;font-size:.28rem;font-weight:700}
+.q4k{background:rgba(0,200,255,.2);border:1px solid rgba(0,200,255,.3);color:var(--accent)}
+.qhd{background:rgba(100,220,100,.15);border:1px solid rgba(100,220,100,.25);color:#64dc64}
+.mc-rating{position:absolute;bottom:3px;left:3px;font-size:.28rem;color:var(--gold);background:rgba(0,0,0,.65);padding:1px 4px;border-radius:2px;display:flex;align-items:center;gap:1px}
+.mc-cont{position:absolute;bottom:3px;right:3px}
+.mc-cont-bar{width:18px;height:2px;border-radius:1px;background:rgba(255,255,255,.15)}
+.mc-cont-fill{height:100%;border-radius:1px;background:var(--accent)}
+.mc-info{padding:4px 5px}
+.mc-title{font-size:.38rem;font-weight:600;margin-bottom:1px;line-height:1.2}
+.mc-meta{font-size:.3rem;color:rgba(255,255,255,.28)}
+.mc-myrating{font-size:.28rem;color:var(--gold);margin-top:1px}
+
+/* ─── ANIME CARD ─── */
+.anc{flex-shrink:0;width:66px;border-radius:7px;background:linear-gradient(135deg,#0d0a1c,#151028);border:1px solid rgba(255,140,0,.08);overflow:hidden;cursor:pointer}
+.anc.fanc{border-color:rgba(255,140,0,.45);box-shadow:0 0 12px rgba(255,140,0,.16)}
+.an-top{height:86px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#100c20,#1a1230);position:relative;font-size:1.1rem}
+.an-sub{position:absolute;bottom:3px;left:3px;padding:1px 4px;border-radius:2px;background:rgba(255,140,0,.2);font-size:.28rem;font-weight:700;color:var(--anime)}
+.an-ep{position:absolute;top:3px;right:3px;padding:1px 4px;border-radius:2px;background:rgba(0,0,0,.7);font-size:.28rem;color:rgba(255,255,255,.45)}
+.an-new{position:absolute;top:3px;left:3px;padding:1px 4px;border-radius:2px;background:rgba(0,224,147,.2);font-size:.28rem;font-weight:700;color:var(--yes)}
+.an-info{padding:4px 5px}
+.an-title{font-size:.38rem;font-weight:600;margin-bottom:1px;line-height:1.2}
+.an-meta{font-size:.3rem;color:rgba(255,140,0,.5)}
+
+/* ─── SERIES CARD ─── */
+.sc{flex-shrink:0;width:90px;border-radius:7px;background:linear-gradient(135deg,#0a0a1c,#0f0f24);border:1px solid rgba(255,255,255,.05);overflow:hidden;cursor:pointer}
+.sc.fsc{border-color:rgba(0,200,255,.5);box-shadow:0 0 12px rgba(0,200,255,.18)}
+.sc-top{height:52px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0c1420,#181d30);position:relative;font-size:.9rem}
+.sc-eps{position:absolute;bottom:3px;right:3px;padding:1px 4px;border-radius:2px;background:rgba(0,0,0,.7);font-size:.28rem;color:rgba(255,255,255,.4)}
+.sc-info{padding:4px 5px}
+.sc-title{font-size:.4rem;font-weight:600;margin-bottom:2px;line-height:1.2}
+.sc-prog{height:2px;border-radius:1px;background:rgba(255,255,255,.06);margin-bottom:2px}
+.sc-prog-fill{height:100%;border-radius:1px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.sc-meta{font-size:.3rem;color:rgba(255,255,255,.28)}
+
+/* ─── ADULT CARD ─── */
+.adultc{flex-shrink:0;width:68px;border-radius:7px;background:linear-gradient(135deg,#140810,#1c0c16);border:1px solid rgba(255,34,102,.1);overflow:hidden;cursor:pointer}
+.adultc.fadc{border-color:rgba(255,34,102,.45);box-shadow:0 0 12px rgba(255,34,102,.16)}
+.ad-top{height:88px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#160a12,#1e0c18);position:relative;overflow:hidden}
+.ad-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:.12;filter:blur(3px)}
+.ad-blur-overlay{position:absolute;inset:0;backdrop-filter:blur(6px);background:rgba(150,0,60,.04);display:flex;align-items:center;justify-content:center;font-size:.7rem}
+.ad-lock{position:absolute;top:3px;right:3px;width:14px;height:14px;border-radius:3px;background:rgba(255,34,102,.2);border:1px solid rgba(255,34,102,.3);display:flex;align-items:center;justify-content:center;font-size:.35rem;z-index:2}
+.ad-info{padding:4px 5px}
+.ad-title{font-size:.36rem;font-weight:600;margin-bottom:1px;color:rgba(255,180,180,.65)}
+.ad-meta{font-size:.28rem;color:rgba(255,34,102,.35)}
+
+/* ─── BARRA INFERIOR EPG ─── */
+.epg-bar{padding:4px 16px;background:rgba(0,0,0,.35);border-top:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:8px;flex-shrink:0;overflow:hidden}
+.epg-lbl{font-size:.35rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.18);flex-shrink:0}
+.epg-items{display:flex;gap:5px;overflow:hidden;flex:1}
+.epg-it{flex-shrink:0;display:flex;align-items:center;gap:4px;padding:3px 6px;border-radius:4px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04)}
+.epg-it.now{background:rgba(0,200,255,.05);border-color:rgba(0,200,255,.12)}
+.epg-t{font-family:'JetBrains Mono',monospace;font-size:.3rem;color:rgba(255,255,255,.22)}
+.epg-p{font-size:.33rem;color:rgba(255,255,255,.5)}
+.epg-it.now .epg-p{color:#fff;font-weight:600}
+.epg-ch{font-size:.3rem;color:rgba(0,200,255,.35)}
+.epg-rem{margin-left:auto;flex-shrink:0}
+.epg-remind{padding:3px 7px;border-radius:4px;background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.15);font-size:.3rem;color:var(--gold);font-weight:600;cursor:pointer}
+
+/* ─── PiP FLOTANTE ─── */
+.pip{position:absolute;bottom:32px;right:14px;width:110px;border-radius:7px;overflow:hidden;border:1px solid rgba(0,200,255,.28);box-shadow:0 8px 24px rgba(0,0,0,.7);z-index:20}
+.pip-video{height:62px;background:linear-gradient(135deg,#0a1520,#06101a);display:flex;align-items:center;justify-content:center;font-size:.9rem;opacity:.35;position:relative}
+.pip-ov{position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.7) 100%)}
+.pip-bar{position:absolute;bottom:0;left:0;right:0;padding:3px 5px;display:flex;align-items:center;gap:3px}
+.pip-play-btn{font-size:.35rem;cursor:pointer}
+.pip-t{font-size:.28rem;color:rgba(255,255,255,.45);font-family:'JetBrains Mono',monospace}
+.pip-cast-btn{margin-left:auto;font-size:.28rem;color:rgba(0,200,255,.5);cursor:pointer}
+.pip-close{font-size:.3rem;color:rgba(255,255,255,.3);cursor:pointer}
+
+/* ─── NOTIF PANEL ─── */
+.notif-panel{position:absolute;top:36px;right:14px;width:180px;background:rgba(8,8,20,.98);border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:30;backdrop-filter:blur(20px);box-shadow:0 12px 40px rgba(0,0,0,.7)}
+.np-header{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.np-title{font-size:.52rem;font-weight:700}
+.np-clear{font-size:.38rem;color:rgba(0,200,255,.5);cursor:pointer}
+.np-item{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:7px;align-items:flex-start;cursor:pointer}
+.np-item:hover{background:rgba(255,255,255,.02)}
+.np-icon{font-size:.7rem;flex-shrink:0;margin-top:1px}
+.np-content{}
+.np-text{font-size:.46rem;color:rgba(255,255,255,.75);line-height:1.4;margin-bottom:1px}
+.np-time{font-size:.36rem;color:var(--muted)}
+.np-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px}
+
+/* ─── SEARCH PANEL ─── */
+.search-panel{position:absolute;top:0;left:0;right:0;background:rgba(5,5,14,.98);z-index:25;backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:10px 16px}
+.sp-input-row{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(0,200,255,.22);margin-bottom:10px}
+.sp-icon{font-size:.6rem;opacity:.4}
+.sp-text{font-size:.58rem;color:rgba(255,255,255,.6);flex:1}
+.sp-cursor{width:1px;height:11px;background:var(--accent);animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.sp-close{font-size:.5rem;color:var(--muted);cursor:pointer}
+.sp-suggestions{margin-bottom:8px}
+.sp-sug-label{font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.sp-sug-row{display:flex;flex-wrap:wrap;gap:4px}
+.sp-sug{padding:3px 8px;border-radius:5px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);font-size:.42rem;color:rgba(255,255,255,.5);cursor:pointer}
+.sp-sug.sel{background:rgba(0,200,255,.08);border-color:rgba(0,200,255,.2);color:var(--accent)}
+.sp-results-label{font-size:.38rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.sp-results-row{display:flex;gap:5px;overflow:hidden}
+.sp-res-item{flex-shrink:0;display:flex;gap:6px;align-items:center;padding:5px 7px;border-radius:6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.04);cursor:pointer}
+.sp-res-item.focused{background:rgba(0,200,255,.08);border-color:rgba(0,200,255,.2)}
+.sp-res-thumb{width:30px;height:18px;border-radius:3px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:.5rem;flex-shrink:0}
+.sp-res-info{}
+.sp-res-title{font-size:.42rem;font-weight:600;margin-bottom:1px}
+.sp-res-type{font-size:.34rem;color:var(--muted)}
+
+/* ─── PLAYER SCREEN ─── */
+.player-screen{width:100%;height:100%;background:#000;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.ps-video{flex:1;background:linear-gradient(135deg,#0a1520,#06101a);display:flex;align-items:center;justify-content:center;font-size:3rem;opacity:.15;position:relative}
+.ps-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,transparent 25%,transparent 65%,rgba(0,0,0,.9) 100%)}
+.ps-top{position:absolute;top:0;left:0;right:0;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.ps-ch-info{display:flex;align-items:center;gap:8px}
+.ps-ch-logo{width:28px;height:18px;border-radius:3px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:.4rem;font-weight:800}
+.ps-ch-name{font-size:.6rem;font-weight:700}
+.ps-ch-prog{font-size:.45rem;color:rgba(255,255,255,.45);margin-top:1px}
+.ps-top-right{display:flex;align-items:center;gap:8px}
+.ps-time{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:rgba(255,255,255,.4)}
+.ps-cast-badge{padding:3px 7px;border-radius:4px;background:rgba(0,200,255,.12);border:1px solid rgba(0,200,255,.2);font-size:.38rem;color:var(--accent);display:flex;align-items:center;gap:3px}
+.ps-bottom{position:absolute;bottom:0;left:0;right:0;padding:8px 18px 12px}
+.ps-prog-bar{height:3px;border-radius:2px;background:rgba(255,255,255,.15);margin-bottom:8px;position:relative;cursor:pointer}
+.ps-prog-fill{height:100%;width:38%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));position:relative}
+.ps-prog-dot{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--accent);position:absolute;right:-5px;top:-3.5px;box-shadow:0 0 8px rgba(0,200,255,.5)}
+.ps-ctrl-row{display:flex;align-items:center;gap:10px}
+.ps-ctrl{font-size:.65rem;color:rgba(255,255,255,.5);cursor:pointer}
+.ps-play-btn{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:.65rem;box-shadow:0 0 14px rgba(0,200,255,.35)}
+.ps-spacer{flex:1}
+.ps-mode-btn{padding:3px 7px;border-radius:4px;font-size:.38rem;font-weight:600;cursor:pointer}
+.ps-cinema{background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.2);color:var(--gold)}
+.ps-sub{background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.18);color:var(--accent)}
+.ps-quality{padding:3px 7px;border-radius:4px;background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.22);font-size:.42rem;font-weight:700;color:var(--accent);cursor:pointer}
+.ps-data-saver{padding:3px 7px;border-radius:4px;background:rgba(0,224,147,.06);border:1px solid rgba(0,224,147,.15);font-size:.38rem;color:var(--yes);cursor:pointer}
+.ps-vol{font-size:.55rem;color:rgba(255,255,255,.4)}
+
+/* quality popup */
+.q-popup{position:absolute;bottom:52px;right:18px;background:rgba(8,8,20,.97);border:1px solid rgba(0,200,255,.18);border-radius:9px;overflow:hidden;backdrop-filter:blur(20px);box-shadow:0 8px 30px rgba(0,0,0,.7)}
+.q-title{padding:7px 12px;font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.06)}
+.q-opt{padding:6px 12px;font-size:.52rem;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;display:flex;align-items:center;gap:6px}
+.q-opt.sel{color:var(--accent)}
+.q-opt.focused-q{background:rgba(0,200,255,.08);color:#fff}
+.q-check{font-size:.42rem;color:var(--accent)}
+.q-auto{font-size:.36rem;color:rgba(0,224,147,.5);margin-left:auto}
+
+/* sub popup */
+.sub-popup{position:absolute;bottom:52px;right:110px;background:rgba(8,8,20,.97);border:1px solid rgba(0,200,255,.18);border-radius:9px;overflow:hidden;backdrop-filter:blur(20px);min-width:100px}
+.sub-title{padding:7px 12px;font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.06)}
+.sub-opt{padding:6px 12px;font-size:.52rem;color:rgba(255,255,255,.55);cursor:pointer;display:flex;align-items:center;gap:6px}
+.sub-opt.sel{color:var(--accent)}.sub-opt.sel::before{content:'✓';font-size:.42rem}
+
+/* ─── SETTINGS SCREEN ─── */
+.settings-screen{width:100%;height:100%;background:linear-gradient(160deg,#05050e,#0a0a1c);display:flex;position:relative;overflow:hidden}
+.set-sidebar{width:120px;flex-shrink:0;padding:14px 0;border-right:1px solid var(--border);background:rgba(0,0,0,.3)}
+.set-logo{font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:.06em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;padding:0 14px;margin-bottom:14px}
+.set-item{padding:7px 14px;font-size:.5rem;font-weight:500;color:rgba(255,255,255,.35);cursor:pointer;display:flex;align-items:center;gap:6px;border-left:2px solid transparent}
+.set-item.sel{color:#fff;background:rgba(0,200,255,.06);border-left-color:var(--accent)}
+.set-content{flex:1;padding:14px;overflow:auto}
+.set-section-title{font-size:.65rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);margin-bottom:6px}
+.set-row-info{}
+.set-row-title{font-size:.55rem;font-weight:600;margin-bottom:2px}
+.set-row-desc{font-size:.42rem;color:var(--muted);line-height:1.4}
+.toggle{width:30px;height:16px;border-radius:8px;position:relative;cursor:pointer;flex-shrink:0}
+.toggle.on{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.toggle.off{background:rgba(255,255,255,.1)}
+.toggle-knob{width:10px;height:10px;border-radius:50%;background:#fff;position:absolute;top:3px;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.toggle.on .toggle-knob{right:3px}.toggle.off .toggle-knob{left:3px}
+.set-select{padding:4px 8px;border-radius:5px;background:rgba(0,200,255,.08);border:1px solid rgba(0,200,255,.18);font-size:.45rem;color:var(--accent);cursor:pointer}
+.set-hours-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px}
+.set-hour{padding:4px;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);font-size:.38rem;color:rgba(255,255,255,.35);text-align:center;cursor:pointer}
+.set-hour.blocked{background:rgba(255,34,102,.08);border-color:rgba(255,34,102,.15);color:rgba(255,34,102,.5)}
+.set-hour.sel-h{background:rgba(0,224,147,.08);border-color:rgba(0,224,147,.2);color:var(--yes)}
+
+/* ─── ADMIN PANEL ─── */
+.admin-screen{width:100%;height:100%;background:#05050e;display:flex;flex-direction:column}
+.admin-bar{padding:8px 16px;background:rgba(0,0,0,.5);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.admin-logo{font-family:'Bebas Neue',sans-serif;font-size:1rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.admin-badge{font-size:.38rem;padding:2px 7px;border-radius:3px;background:rgba(0,200,255,.08);color:var(--accent);border:1px solid rgba(0,200,255,.18);letter-spacing:.08em}
+.admin-url{font-size:.38rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.admin-body{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;overflow:hidden}
+.admin-col{}
+.admin-col-title{font-size:.42rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.admin-col-title::before{content:'';width:2px;height:7px;border-radius:1px;background:linear-gradient(180deg,var(--accent),var(--accent2));display:block}
+
+/* Profile row */
+.prof-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);margin-bottom:5px}
+.pr-av{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0}
+.pr-info{flex:1;min-width:0}
+.pr-name{font-size:.52rem;font-weight:600;margin-bottom:1px}
+.pr-meta{font-size:.36rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-status{font-size:.36rem;display:flex;align-items:center;gap:2px;margin-right:6px}
+.pr-status.online{color:var(--yes)}.pr-status.offline{color:var(--muted)}.pr-status.blocked{color:var(--no)}
+.pr-toggle{flex-shrink:0}
+
+/* Stats */
+.stat-card{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);margin-bottom:5px}
+.stat-title{font-size:.46rem;font-weight:600;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between}
+.stat-bar-row{display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.stat-label{font-size:.36rem;color:var(--muted);width:40px;flex-shrink:0}
+.stat-bar{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.06)}
+.stat-bar-fill{height:100%;border-radius:2px}
+.stat-val{font-size:.36rem;color:rgba(255,255,255,.4);width:20px;text-align:right}
+
+/* Auth emails */
+.email-row{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);margin-bottom:4px}
+.email-text{font-size:.44rem;color:rgba(255,255,255,.6);flex:1;font-family:'JetBrains Mono',monospace}
+.email-status{font-size:.36rem;font-weight:700;padding:1px 5px;border-radius:3px}
+.es-ok{background:rgba(0,224,147,.1);color:var(--yes)}.es-blocked{background:rgba(255,34,102,.1);color:var(--no)}
+.email-del{font-size:.4rem;color:rgba(255,255,255,.2);cursor:pointer}
+.add-email{display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:6px;border:1px dashed rgba(0,200,255,.2);font-size:.42rem;color:rgba(0,200,255,.4);cursor:pointer;margin-top:4px}
+
+@media(max-width:640px){
+  .admin-body{grid-template-columns:1fr}
+  .set-sidebar{width:90px}
+}
+
+/* BLINK */
+@keyframes live-blink{0%,100%{opacity:1}50%{opacity:.2}}
+.live-dot{width:4px;height:4px;border-radius:50%;background:#ff2244;animation:live-blink 1s infinite;display:inline-block}
+</style>
+</head>
+<body>
+
+<!-- ══ PAGE HEADER ══ -->
+<div class="page-header">
+  <div class="page-eyebrow">Proyecto MaxTV — Diseño Final Completo</div>
+  <div class="page-title">MaxTV</div>
+  <div class="page-sub">
+    Canales en Vivo · Películas · Series · Anime · Adultos · Búsqueda · EPG · PiP · Cast<br>
+    Perfiles con PIN · Bloqueo Remoto · Correos Autorizados · Control Parental · Historial · Modo Cine
+  </div>
+</div>
+
+<!-- ══ FUNCIONES AGREGADAS ══ -->
+<div class="features-banner">
+  <div class="feat-item"><div class="feat-icon">📡</div><div class="feat-content"><div class="feat-title">Canales en Vivo</div><div class="feat-desc">Con progreso del programa, barra en tiempo real y cambio rápido de canal</div></div></div>
+  <div class="feat-item"><div class="feat-icon">🎬</div><div class="feat-content"><div class="feat-title">Películas y VOD</div><div class="feat-desc">Calificación, calidad 4K/HD, continuar viendo con porcentaje visto</div></div></div>
+  <div class="feat-item"><div class="feat-icon">📺</div><div class="feat-content"><div class="feat-title">Series</div><div class="feat-desc">Seguimiento por episodio, progreso visual, temporadas disponibles</div></div></div>
+  <div class="feat-item"><div class="feat-icon">⚡</div><div class="feat-content"><div class="feat-title">Anime</div><div class="feat-desc">Sección dedicada, Sub/Dub, seguimiento de episodios por perfil</div></div></div>
+  <div class="feat-item"><div class="feat-icon">🔞</div><div class="feat-content"><div class="feat-title">Adultos</div><div class="feat-desc">PIN requerido, miniaturas difuminadas, oculto en perfil Niños</div></div></div>
+  <div class="feat-item"><div class="feat-icon">👤</div><div class="feat-content"><div class="feat-title">Perfiles con PIN</div><div class="feat-desc">Hasta 5 perfiles, historial independiente, avatar personalizable</div></div></div>
+  <div class="feat-item"><div class="feat-icon">🛡</div><div class="feat-content"><div class="feat-title">Bloqueo Remoto</div><div class="feat-desc">Panel admin en tu teléfono para bloquear perfiles y correos</div></div></div>
+  <div class="feat-item"><div class="feat-icon">📧</div><div class="feat-content"><div class="feat-title">Correos Autorizados</div><div class="feat-desc">Lista blanca — solo tus correos aprobados pueden acceder a MaxTV</div></div></div>
+  <div class="feat-item"><div class="feat-icon">🔍</div><div class="feat-content"><div class="feat-title">Búsqueda con sugerencias <span class="feat-new">NUEVO</span></div><div class="feat-desc">Teclado virtual, sugerencias en tiempo real, búsqueda en todo el catálogo</div></div></div>
+  <div class="feat-item"><div class="feat-icon">▶️</div><div class="feat-content"><div class="feat-title">Continuar Viendo</div><div class="feat-desc">Retoma donde lo dejaste en cualquiera de los 4 TVs</div></div></div>
+  <div class="feat-item"><div class="feat-icon">❤️</div><div class="feat-content"><div class="feat-title">Mi Lista</div><div class="feat-desc">Favoritos por perfil, sincronizados en todos los TVs</div></div></div>
+  <div class="feat-item"><div class="feat-icon">📅</div><div class="feat-content"><div class="feat-title">EPG 7 días</div><div class="feat-desc">Guía de programación en la barra inferior con recordatorios</div></div></div>
+  <div class="feat-item"><div class="feat-icon">🔔</div><div class="feat-content"><div class="feat-title">Notificaciones</div><div class="feat-desc">Nuevo episodio, programa por empezar, recordatorios configurados</div></div></div>
+  <div class="feat-item"><div class="feat-icon">🌐</div><div class="feat-content"><div class="feat-title">Subtítulos e Idioma</div><div class="feat-desc">Español, Inglés, Portugués — cambia desde el reproductor</div></div></div>
+  <div class="feat-item"><div class="feat-icon">📊</div><div class="feat-content"><div class="feat-title">Modo Ahorro de Datos</div><div class="feat-desc">Fuerza 480p automáticamente cuando el internet está lento</div></div></div>
+  <div class="feat-item"><div class="feat-icon">⧉</div><div class="feat-content"><div class="feat-title">Picture in Picture</div><div class="feat-desc">Miniplayer flotante mientras navegas el catálogo</div></div></div>
+  <div class="feat-item"><div class="feat-icon">⏰</div><div class="feat-content"><div class="feat-title">Recordatorios</div><div class="feat-desc">Avisa cuando empieza un programa — notificación en el TV</div></div></div>
+  <div class="feat-item"><div class="feat-icon">🎭</div><div class="feat-content"><div class="feat-title">Modo Cine <span class="feat-new">NUEVO</span></div><div class="feat-desc">Oculta todos los controles para ver sin distracciones</div></div></div>
+  <div class="feat-item"><div class="feat-icon">📡</div><div class="feat-content"><div class="feat-title">Cast a otro TV <span class="feat-new">NUEVO</span></div><div class="feat-desc">Envía lo que estás viendo a cualquier otro Hisense de la casa</div></div></div>
+  <div class="feat-item"><div class="feat-icon">📈</div><div class="feat-content"><div class="feat-title">Panel de Estadísticas <span class="feat-new">NUEVO</span></div><div class="feat-desc">Horas vistas por perfil, contenido favorito, dispositivo más usado</div></div></div>
+  <div class="feat-item"><div class="feat-icon">🌙</div><div class="feat-content"><div class="feat-title">Modo Nocturno</div><div class="feat-desc">Reduce brillo y temperatura de color después de las 10 PM</div></div></div>
+  <div class="feat-item"><div class="feat-icon">👶</div><div class="feat-content"><div class="feat-title">Control Parental Avanzado <span class="feat-new">NUEVO</span></div><div class="feat-desc">Límite de horas diarias, horario de uso y bloqueo de categorías</div></div></div>
+  <div class="feat-item"><div class="feat-icon">📖</div><div class="feat-content"><div class="feat-title">Historial de Reproducciones <span class="feat-new">NUEVO</span></div><div class="feat-desc">Todo lo que viste, cuándo y en qué TV — por perfil</div></div></div>
+  <div class="feat-item"><div class="feat-icon">⭐</div><div class="feat-content"><div class="feat-title">Calificaciones <span class="feat-new">NUEVO</span></div><div class="feat-desc">Califica el contenido con estrellas — tu lista ordenada por tu gusto</div></div></div>
+</div>
+
+<!-- ══════════════ PANTALLA 1: HOME COMPLETO ══════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">1</div>
+    <div><div class="sec-title">Pantalla Principal — Vista Completa</div><div class="sec-desc">Menú con todas las secciones · EPG inferior · PiP flotante · Notificaciones · Reloj</div></div>
+  </div>
+  <div class="screen">
+    <div class="app">
+      <div class="glow-1"></div><div class="glow-2"></div><div class="glow-3"></div>
+
+      <div class="tb">
+        <div class="tb-logo">MaxTV</div>
+        <div class="tb-nav">
+          <div class="tn a">Inicio</div>
+          <div class="tn">En Vivo</div>
+          <div class="tn">Películas</div>
+          <div class="tn">Series</div>
+          <div class="tn anime">⚡ Anime</div>
+          <div class="tn adult">🔞</div>
+          <div class="tn fav">❤️ Lista</div>
+          <div class="tn">▶️ Continuar</div>
+          <div class="tn">📖 Historial</div>
+        </div>
+        <div class="tb-right">
+          <div class="tb-icon">🔍</div>
+          <div class="tb-icon">🔔<div class="tb-notif-dot"></div></div>
+          <div class="tb-user"><div class="tb-user-av">M</div><div class="tb-user-name">Maxwell</div></div>
+          <div class="tb-clock">8:34 PM · Lun</div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <div class="hero-inner">
+          <div class="hero-thumb">⚽<div class="hero-live-badge">● VIVO</div><div class="hero-4k">4K</div></div>
+          <div class="hero-info">
+            <div class="h-badge">🔴 EN VIVO · ESPN</div>
+            <div class="h-title">Clásico: Real Madrid vs Barcelona · La Liga 2025</div>
+            <div class="h-meta">Minuto 67' · Marcador 2–1 · Español / Inglés · Estadio Santiago Bernabéu</div>
+            <div class="h-btns">
+              <div class="h-btn h-play">▶ Ver ahora</div>
+              <div class="h-btn h-info-b">📅 EPG completa</div>
+              <div class="h-btn h-pip">⧉ PiP</div>
+              <div class="h-btn h-cast">📡 Cast</div>
+              <div class="h-btn" style="background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.18);color:var(--gold);font-size:.4rem;font-weight:700;padding:4px 8px;border-radius:5px;cursor:pointer">⏰ Recordar</div>
+            </div>
+          </div>
+          <div class="hero-stats">
+            <span class="hs-label">Termina en</span>
+            <span class="hs-time">23:14</span>
+            <div class="hs-viewers"><div class="live-dot" style="display:inline-block;margin-right:2px"></div> 1,240 viendo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="row-s">
+          <div class="rt"><span class="rt-left">📡 Canales en Vivo</span><span class="rt-more">Ver todos (48) →</span></div>
+          <div class="cards">
+            <div class="cc fc">
+              <div class="cc-top"><span style="color:#ff6600;font-size:.6rem">ESPN</span><div class="cc-live">● VIVO</div><div class="cc-hd">4K</div></div>
+              <div class="cc-prog-bar"><div class="cc-fill" style="width:67%"></div></div>
+              <div class="cc-info"><div class="cc-name">ESPN</div><div class="cc-show">Real Madrid vs Barça</div><div class="cc-time"><div class="live-dot"></div> 23 min restantes</div></div>
+            </div>
+            <div class="cc">
+              <div class="cc-top"><span style="font-size:.52rem">TVSA</span><div class="cc-live">● VIVO</div><div class="cc-hd">HD</div></div>
+              <div class="cc-prog-bar"><div class="cc-fill" style="width:40%"></div></div>
+              <div class="cc-info"><div class="cc-name">Televisa</div><div class="cc-show">Noticias con Adela</div><div class="cc-time">32 min restantes</div></div>
+            </div>
+            <div class="cc">
+              <div class="cc-top"><span style="color:#4488ff;font-size:.52rem">TNT</span><div class="cc-live">● VIVO</div><div class="cc-hd">HD</div></div>
+              <div class="cc-prog-bar"><div class="cc-fill" style="width:25%"></div></div>
+              <div class="cc-info"><div class="cc-name">TNT</div><div class="cc-show">Fast X · Película</div><div class="cc-time">1h 10min restantes</div></div>
+            </div>
+            <div class="cc">
+              <div class="cc-top"><span style="color:#ff44aa;font-size:.52rem">HTV</span><div class="cc-live">● VIVO</div><div class="cc-hd">HD</div></div>
+              <div class="cc-prog-bar"><div class="cc-fill" style="width:55%"></div></div>
+              <div class="cc-info"><div class="cc-name">HTV</div><div class="cc-show">Top 40 Latino</div><div class="cc-time">18 min restantes</div></div>
+            </div>
+            <div class="cc">
+              <div class="cc-top"><span style="font-size:.44rem">CNN+</span><div class="cc-live">● VIVO</div><div class="cc-hd">HD</div></div>
+              <div class="cc-prog-bar"><div class="cc-fill" style="width:80%"></div></div>
+              <div class="cc-info"><div class="cc-name">CNN Español</div><div class="cc-show">Breaking News</div><div class="cc-time">8 min restantes</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-s" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:2px">
+          <!-- Continuar viendo -->
+          <div>
+            <div class="rt"><span class="rt-left">▶️ Continuar viendo</span><span class="rt-more">Ver →</span></div>
+            <div class="cards">
+              <div class="mc fmc">
+                <div class="mc-top">🔫<div class="mc-q q4k">4K</div><div class="mc-rating">⭐ 8.8</div><div class="mc-cont"><div class="mc-cont-bar"><div class="mc-cont-fill" style="width:60%"></div></div></div></div>
+                <div class="mc-info"><div class="mc-title">John Wick 4</div><div class="mc-meta">60% visto</div><div class="mc-myrating">Tu nota: ★★★★☆</div></div>
+              </div>
+              <div class="mc">
+                <div class="mc-top">🚀<div class="mc-q qhd">HD</div><div class="mc-rating">⭐ 7.5</div><div class="mc-cont"><div class="mc-cont-bar"><div class="mc-cont-fill" style="width:45%"></div></div></div></div>
+                <div class="mc-info"><div class="mc-title">Guardianes 3</div><div class="mc-meta">45% visto</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- Anime -->
+          <div>
+            <div class="rt"><span class="rt-left" style="color:rgba(255,140,0,.5)">⚡ Anime</span><span class="rt-more" style="color:rgba(255,140,0,.3)">Ver →</span></div>
+            <div class="cards">
+              <div class="anc fanc">
+                <div class="an-top">⚔️<div class="an-sub">SUB</div><div class="an-ep">EP 8/12</div><div class="an-new">NUEVO</div></div>
+                <div class="an-info"><div class="an-title">Demon Slayer S4</div><div class="an-meta">⭐ 9.1 · Acción</div></div>
+              </div>
+              <div class="anc">
+                <div class="an-top">⚡<div class="an-sub">DUB</div><div class="an-ep">EP 24</div></div>
+                <div class="an-info"><div class="an-title">Jujutsu S3</div><div class="an-meta">⭐ 9.0</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- Series -->
+          <div>
+            <div class="rt"><span class="rt-left">📺 Series</span><span class="rt-more">Ver →</span></div>
+            <div class="cards">
+              <div class="sc fsc">
+                <div class="sc-top">🧟<div class="sc-eps">T4 · EP 6</div></div>
+                <div class="sc-info"><div class="sc-title">Walking Dead Universe</div><div class="sc-prog"><div class="sc-prog-fill" style="width:70%"></div></div><div class="sc-meta">70% visto</div></div>
+              </div>
+              <div class="sc">
+                <div class="sc-top">👑<div class="sc-eps">T3 · EP 2</div></div>
+                <div class="sc-info"><div class="sc-title">House of Dragon</div><div class="sc-prog"><div class="sc-prog-fill" style="width:20%"></div></div><div class="sc-meta">20% visto</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="epg-bar">
+        <div class="epg-lbl">📅 EPG</div>
+        <div class="epg-items">
+          <div class="epg-it now"><div class="epg-t">20:45</div><div class="epg-p">Clásico EN VIVO</div><div class="epg-ch">ESPN</div></div>
+          <div class="epg-it"><div class="epg-t">21:00</div><div class="epg-p">La Rosa de Guadalupe</div><div class="epg-ch">Televisa</div></div>
+          <div class="epg-it"><div class="epg-t">21:30</div><div class="epg-p">Breaking News</div><div class="epg-ch">CNN+</div></div>
+          <div class="epg-it"><div class="epg-t">22:00</div><div class="epg-p">Demon Slayer EP 9</div><div class="epg-ch">Anime</div></div>
+          <div class="epg-it"><div class="epg-t">22:30</div><div class="epg-p">Fast X · Película</div><div class="epg-ch">TNT</div></div>
+        </div>
+        <div class="epg-rem"><div class="epg-remind">+ Recordar 22:00</div></div>
+      </div>
+
+      <!-- PiP flotante -->
+      <div class="pip">
+        <div class="pip-video">⚽<div class="pip-ov"></div></div>
+        <div class="pip-bar">
+          <div class="pip-play-btn">⏸</div>
+          <div class="pip-t">67' · ESPN</div>
+          <div class="pip-cast-btn">📡</div>
+          <div class="pip-close">✕</div>
+        </div>
+      </div>
+
+      <!-- Panel de notificaciones -->
+      <div class="notif-panel">
+        <div class="np-header"><div class="np-title">🔔 Notificaciones</div><div class="np-clear">Limpiar</div></div>
+        <div class="np-item"><div class="np-dot"></div><div class="np-icon">⚡</div><div class="np-content"><div class="np-text">Demon Slayer EP 9 ya disponible</div><div class="np-time">Hace 5 minutos</div></div></div>
+        <div class="np-item"><div class="np-icon">⏰</div><div class="np-content"><div class="np-text">La Rosa empieza en 15 minutos · Televisa</div><div class="np-time">Recordatorio programado</div></div></div>
+        <div class="np-item"><div class="np-icon">📺</div><div class="np-content"><div class="np-text">Nueva serie disponible: House of Dragon T4</div><div class="np-time">Hoy · 6:00 PM</div></div></div>
+      </div>
+
+    </div>
+  </div>
+  <p class="screen-note">Panel de notificaciones desplegado · PiP flotante en esquina · EPG en barra inferior con recordatorio</p>
+</div>
+
+<!-- ══════════════ PANTALLA 2: REPRODUCTOR ══════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">2</div>
+    <div><div class="sec-title">Reproductor Completo</div><div class="sec-desc">Calidad · Subtítulos · Modo Cine · Cast · Ahorro de datos · Barra de progreso</div></div>
+  </div>
+  <div class="screen">
+    <div class="player-screen">
+      <div class="ps-video">📺<div class="ps-overlay"></div></div>
+
+      <div class="ps-top">
+        <div class="ps-ch-info">
+          <div class="ps-ch-logo" style="color:#ff6600">ESPN</div>
+          <div><div class="ps-ch-name">ESPN · <span style="color:#ff2244">● EN VIVO</span></div><div class="ps-ch-prog">Real Madrid vs Barcelona · La Liga · Minuto 67'</div></div>
+        </div>
+        <div class="ps-top-right">
+          <div class="ps-cast-badge">📡 Cast → TV Sala</div>
+          <div class="ps-time">8:34 PM</div>
+        </div>
+      </div>
+
+      <div class="ps-bottom">
+        <div class="ps-prog-bar"><div class="ps-prog-fill"><div class="ps-prog-dot"></div></div></div>
+        <div class="ps-ctrl-row">
+          <div class="ps-ctrl">⏮</div>
+          <div class="ps-play-btn">⏸</div>
+          <div class="ps-ctrl">⏭</div>
+          <div class="ps-spacer"></div>
+          <div class="ps-mode-btn ps-cinema">🎭 Modo Cine</div>
+          <div class="ps-mode-btn ps-sub">🌐 Español</div>
+          <div class="ps-data-saver">📊 Ahorro</div>
+          <div class="ps-vol">🔊 80%</div>
+          <div class="ps-quality">1080p ▾</div>
+        </div>
+      </div>
+
+      <!-- Quality popup -->
+      <div class="q-popup">
+        <div class="q-title">Calidad de video</div>
+        <div class="q-opt sel"><span class="q-check">✓</span> Auto<span class="q-auto">recomendado</span></div>
+        <div class="q-opt focused-q">1080p Full HD</div>
+        <div class="q-opt">720p HD</div>
+        <div class="q-opt">480p SD</div>
+        <div class="q-opt">360p · Ahorro</div>
+      </div>
+
+      <!-- Subtitle popup -->
+      <div class="sub-popup">
+        <div class="sub-title">Subtítulos</div>
+        <div class="sub-opt sel">Español</div>
+        <div class="sub-opt">English</div>
+        <div class="sub-opt">Português</div>
+        <div class="sub-opt" style="color:var(--muted)">Sin subtítulos</div>
+      </div>
+    </div>
+  </div>
+  <p class="screen-note">Selector de calidad y subtítulos abiertos simultáneamente · Cast activo hacia TV Sala · Modo Cine disponible</p>
+</div>
+
+<!-- ══════════════ PANTALLA 3: BÚSQUEDA ══════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">3</div>
+    <div><div class="sec-title">Búsqueda con Sugerencias</div><div class="sec-desc">Teclado virtual · Sugerencias en tiempo real · Resultados de canales, películas, series y anime</div></div>
+  </div>
+  <div class="screen">
+    <div class="app">
+      <div class="glow-1"></div><div class="glow-2"></div>
+      <div class="tb">
+        <div class="tb-logo">MaxTV</div>
+        <div class="tb-nav"><div class="tn a">Buscar</div></div>
+        <div class="tb-right"><div class="tb-user"><div class="tb-user-av">M</div><div class="tb-user-name">Maxwell</div></div></div>
+      </div>
+      <div class="search-panel">
+        <div class="sp-input-row">
+          <div class="sp-icon">🔍</div>
+          <div class="sp-text">fut<div class="sp-cursor"></div></div>
+          <div class="sp-close">✕</div>
+        </div>
+        <div class="sp-suggestions">
+          <div class="sp-sug-label">Sugerencias</div>
+          <div class="sp-sug-row">
+            <div class="sp-sug sel">⚽ fútbol en vivo</div>
+            <div class="sp-sug">🏆 fútbol mexicano</div>
+            <div class="sp-sug">🎬 futbol sala</div>
+            <div class="sp-sug">📺 Fox Sports fútbol</div>
+          </div>
+        </div>
+        <div class="sp-results-label">Resultados para "fut"</div>
+        <div class="sp-results-row">
+          <div class="sp-res-item focused"><div class="sp-res-thumb" style="color:#ff6600;font-size:.45rem;font-weight:800">ESPN</div><div class="sp-res-info"><div class="sp-res-title">ESPN — Fútbol EN VIVO</div><div class="sp-res-type">Canal en Vivo · 4K</div></div></div>
+          <div class="sp-res-item"><div class="sp-res-thumb">⚽</div><div class="sp-res-info"><div class="sp-res-title">Fox Sports</div><div class="sp-res-type">Canal en Vivo · HD</div></div></div>
+          <div class="sp-res-item"><div class="sp-res-thumb">🎬</div><div class="sp-res-info"><div class="sp-res-title">Pelé · Documental</div><div class="sp-res-type">Película · 2022</div></div></div>
+          <div class="sp-res-item"><div class="sp-res-thumb">🏃</div><div class="sp-res-info"><div class="sp-res-title">Fútbol de Estufa</div><div class="sp-res-type">Serie · 3 temporadas</div></div></div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;opacity:.15;font-size:3rem">🔍</div>
+    </div>
+  </div>
+  <p class="screen-note">Sugerencias aparecen mientras escribes · Resultados de todas las secciones en una sola vista</p>
+</div>
+
+<!-- ══════════════ PANTALLA 4: CONFIGURACIÓN ══════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">4</div>
+    <div><div class="sec-title">Panel de Configuración</div><div class="sec-desc">Control parental avanzado · Modo nocturno · Idioma · Ahorro de datos · Privacidad</div></div>
+  </div>
+  <div class="screen">
+    <div class="settings-screen">
+      <div class="glow-1"></div>
+      <div class="set-sidebar">
+        <div class="set-logo">MaxTV</div>
+        <div class="set-item">👤 Perfiles</div>
+        <div class="set-item sel">👶 Control parental</div>
+        <div class="set-item">🎨 Apariencia</div>
+        <div class="set-item">📊 Datos y calidad</div>
+        <div class="set-item">🔔 Notificaciones</div>
+        <div class="set-item">🌐 Idioma</div>
+        <div class="set-item">📡 Dispositivos</div>
+        <div class="set-item">ℹ️ Acerca de</div>
+      </div>
+      <div class="set-content">
+        <div class="set-section-title">👶 Control Parental Avanzado</div>
+        <div class="set-row">
+          <div class="set-row-info"><div class="set-row-title">Perfil a configurar</div><div class="set-row-desc">Aplicar restricciones al perfil seleccionado</div></div>
+          <div class="set-select">🧒 Niños ▾</div>
+        </div>
+        <div class="set-row">
+          <div class="set-row-info"><div class="set-row-title">Límite de tiempo diario</div><div class="set-row-desc">Máximo 2 horas por día — se bloquea automáticamente</div></div>
+          <div class="set-select">2h / día ▾</div>
+        </div>
+        <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div class="set-row-info"><div class="set-row-title">Horario permitido</div><div class="set-row-desc">Solo puede usar MaxTV en estas horas (verde = permitido, rojo = bloqueado)</div></div>
+          <div class="set-hours-grid" style="width:100%">
+            <div class="set-hour blocked">6am</div><div class="set-hour blocked">7am</div>
+            <div class="set-hour sel-h">8am</div><div class="set-hour sel-h">9am</div>
+            <div class="set-hour sel-h">10am</div><div class="set-hour sel-h">11am</div>
+            <div class="set-hour sel-h">12pm</div><div class="set-hour sel-h">1pm</div>
+            <div class="set-hour sel-h">2pm</div><div class="set-hour sel-h">3pm</div>
+            <div class="set-hour sel-h">4pm</div><div class="set-hour blocked">5pm</div>
+            <div class="set-hour blocked">6pm</div><div class="set-hour blocked">7pm</div>
+            <div class="set-hour blocked">8pm</div><div class="set-hour blocked">9pm</div>
+          </div>
+        </div>
+        <div class="set-row">
+          <div class="set-row-info"><div class="set-row-title">Bloquear sección Adultos</div><div class="set-row-desc">El perfil nunca verá contenido +18</div></div>
+          <div class="toggle on"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="set-row">
+          <div class="set-row-info"><div class="set-row-title">Modo nocturno automático</div><div class="set-row-desc">Reduce brillo y color cálido después de las 10 PM</div></div>
+          <div class="toggle on"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="set-row">
+          <div class="set-row-info"><div class="set-row-title">Modo ahorro de datos</div><div class="set-row-desc">Baja a 480p cuando el internet está por debajo de 5 Mbps</div></div>
+          <div class="toggle off"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="screen-note">Control parental por horas del día · Verde = permitido · Rojo = bloqueado · Toggle para cada función</p>
+</div>
+
+<!-- ══════════════ PANTALLA 5: PANEL ADMIN ══════════════ -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">5</div>
+    <div><div class="sec-title">Panel Admin Remoto — Desde tu Teléfono</div><div class="sec-desc">Control de perfiles · Estadísticas de uso · Correos autorizados · Bloqueo en tiempo real</div></div>
+  </div>
+  <div class="screen">
+    <div class="admin-screen">
+      <div class="glow-1"></div>
+      <div class="admin-bar">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="admin-logo">MaxTV</div>
+          <div class="admin-badge">🛡 Panel Admin</div>
+        </div>
+        <div class="admin-url">maxtv.railway.app/admin · Maxwell</div>
+      </div>
+      <div class="admin-body">
+
+        <!-- COL 1 -->
+        <div class="admin-col">
+          <div class="admin-col-title">Control de Perfiles</div>
+          <div class="prof-row">
+            <div class="pr-av" style="background:linear-gradient(135deg,#1a2a3a,#0d1520)">👨‍💻</div>
+            <div class="pr-info"><div class="pr-name">Maxwell <span style="font-size:.36rem;color:var(--accent);margin-left:3px">ADMIN</span></div><div class="pr-meta">TV Sala · Clásico ESPN · ahora</div></div>
+            <div class="pr-status online"><div class="live-dot" style="width:5px;height:5px"></div> Online</div>
+            <div class="pr-toggle"><div class="toggle on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div class="prof-row">
+            <div class="pr-av" style="background:linear-gradient(135deg,#2a1a2e,#1a0d1e)">👩‍🦱</div>
+            <div class="pr-info"><div class="pr-name">Mi novia</div><div class="pr-meta">Inactiva hace 2h · TV Cuarto</div></div>
+            <div class="pr-status offline">● Offline</div>
+            <div class="pr-toggle"><div class="toggle on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div class="prof-row">
+            <div class="pr-av" style="background:linear-gradient(135deg,#1a2a1a,#0d1a0d)">🧒</div>
+            <div class="pr-info"><div class="pr-name">Niños <span style="font-size:.36rem;color:#64dc64;margin-left:3px">INFANTIL</span></div><div class="pr-meta">Hoy: 1h 20min · Límite: 2h</div></div>
+            <div class="pr-status offline">● Offline</div>
+            <div class="pr-toggle"><div class="toggle on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div class="prof-row" style="border-color:rgba(255,34,102,.15)">
+            <div class="pr-av" style="background:rgba(40,10,10,.8);opacity:.5">👤</div>
+            <div class="pr-info"><div class="pr-name" style="color:rgba(255,255,255,.35)">Invitado</div><div class="pr-meta" style="color:rgba(255,34,102,.4)">🔒 Bloqueado por admin hace 30min</div></div>
+            <div class="pr-status blocked">● Bloqueado</div>
+            <div class="pr-toggle"><div class="toggle off"><div class="toggle-knob"></div></div></div>
+          </div>
+
+          <div style="margin-top:10px">
+            <div class="admin-col-title">Correos Autorizados</div>
+            <div class="email-row"><div class="email-text">maxwell@gmail.com</div><div class="email-status es-ok">✓ Activo</div><div class="email-del">🗑</div></div>
+            <div class="email-row"><div class="email-text">minovia@gmail.com</div><div class="email-status es-ok">✓ Activo</div><div class="email-del">🗑</div></div>
+            <div class="email-row"><div class="email-text">invitado@gmail.com</div><div class="email-status es-blocked">✗ Bloqueado</div><div class="email-del">🗑</div></div>
+            <div class="add-email">＋ Agregar correo autorizado</div>
+          </div>
+        </div>
+
+        <!-- COL 2 -->
+        <div class="admin-col">
+          <div class="admin-col-title">Estadísticas de Uso — Esta semana</div>
+          <div class="stat-card">
+            <div class="stat-title"><span>Horas vistas por perfil</span><span style="font-size:.38rem;color:var(--muted)">últimos 7 días</span></div>
+            <div class="stat-bar-row"><div class="stat-label">Maxwell</div><div class="stat-bar"><div class="stat-bar-fill" style="width:85%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div></div><div class="stat-val">18h</div></div>
+            <div class="stat-bar-row"><div class="stat-label">Mi novia</div><div class="stat-bar"><div class="stat-bar-fill" style="width:55%;background:linear-gradient(90deg,#ff44aa,#aa00aa)"></div></div><div class="stat-val">12h</div></div>
+            <div class="stat-bar-row"><div class="stat-label">Niños</div><div class="stat-bar"><div class="stat-bar-fill" style="width:30%;background:linear-gradient(90deg,#64dc64,#00aa44)"></div></div><div class="stat-val">6h</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title"><span>Contenido más visto</span></div>
+            <div class="stat-bar-row"><div class="stat-label">En Vivo</div><div class="stat-bar"><div class="stat-bar-fill" style="width:70%;background:linear-gradient(90deg,#ff2244,#ff6600)"></div></div><div class="stat-val">70%</div></div>
+            <div class="stat-bar-row"><div class="stat-label">Películas</div><div class="stat-bar"><div class="stat-bar-fill" style="width:15%;background:var(--accent)"></div></div><div class="stat-val">15%</div></div>
+            <div class="stat-bar-row"><div class="stat-label">Anime</div><div class="stat-bar"><div class="stat-bar-fill" style="width:10%;background:var(--anime)"></div></div><div class="stat-val">10%</div></div>
+            <div class="stat-bar-row"><div class="stat-label">Series</div><div class="stat-bar"><div class="stat-bar-fill" style="width:5%;background:var(--accent2)"></div></div><div class="stat-val">5%</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title"><span>Dispositivos activos</span></div>
+            <div class="stat-bar-row"><div class="stat-label" style="width:60px">TV Sala</div><div class="stat-bar"><div class="stat-bar-fill" style="width:80%;background:var(--accent)"></div></div><div class="stat-val" style="color:var(--yes)">● ON</div></div>
+            <div class="stat-bar-row"><div class="stat-label" style="width:60px">TV Cuarto</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div><div class="stat-val">OFF</div></div>
+            <div class="stat-bar-row"><div class="stat-label" style="width:60px">TV Juegos</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div><div class="stat-val">OFF</div></div>
+            <div class="stat-bar-row"><div class="stat-label" style="width:60px">TV #4</div><div class="stat-bar"><div class="stat-bar-fill" style="width:0%"></div></div><div class="stat-val">OFF</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <p class="screen-note">Panel accesible desde tu teléfono en maxtv.railway.app/admin · Cambios en tiempo real en los 4 TVs</p>
+</div>
+
+</body>
+</html>
