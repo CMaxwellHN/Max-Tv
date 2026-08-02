@@ -1,36 +1,3 @@
-const express = require('express');
-const pool = require('../config/db');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
-
-const router = express.Router();
-router.use(requireAuth, requireAdmin);
-
-// ── Perfiles: bloquear/desbloquear ──
-router.patch('/profiles/:id/status', async (req, res) => {
-  const { status } = req.body; // 'active' | 'blocked'
-  await pool.query('UPDATE profiles SET status = $1 WHERE id = $2', [status, req.params.id]);
-  res.json({ ok: true });
-});
-
-// ── Correos autorizados ──
-router.get('/emails', async (req, res) => {
-  const { rows } = await pool.query('SELECT * FROM authorized_emails ORDER BY created_at ASC');
-  res.json(rows);
-});
-
-router.post('/emails', async (req, res) => {
-  const { email } = req.body;
-  const { rows } = await pool.query(
-    `INSERT INTO authorized_emails (email) VALUES ($1)
-     ON CONFLICT (email) DO UPDATE SET status = 'active' RETURNING *`,
-    [email.toLowerCase().trim()]
-  );
-  res.status(201).json(rows[0]);
-});
-
-router.patch('/emails/:id/status', async (req, res) => {
-  const { status } = req.body;
-  await pool.query('UPDATE authorized_emails SET status = $1 WHERE id = $2', [status, req.params.id]);
   res.json({ ok: true });
 });
 
@@ -70,3 +37,4 @@ router.get('/stats/content-mix', async (req, res) => {
 });
 
 module.exports = router;
+
