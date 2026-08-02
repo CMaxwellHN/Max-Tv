@@ -7,7 +7,7 @@ const profileRoutes = require('./routes/profiles');
 const liveRoutes = require('./routes/live');
 const vodRoutes = require('./routes/vod');
 const adminRoutes = require('./routes/admin');
-
+const bootstrapRoutes = require('./routes/bootstrap');
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -19,7 +19,7 @@ app.use('/api/profiles', profileRoutes);
 app.use('/api/live', liveRoutes);
 app.use('/api/vod', vodRoutes);
 app.use('/api/admin', adminRoutes);
-
+app.use('/api/bootstrap', bootstrapRoutes);
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: 'Error interno del servidor' });
