@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaxTV — Perfiles</title>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #131a2e;
+    --accent: #7c5cff;
+    --accent2: #00d4ff;
+    --muted: #7a8199;
+    --text: #f0f2f8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at top, #1a2140 0%, #05070d 70%);
+    color: var(--text);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+  .logo {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--muted); font-size: .85rem; margin-bottom: 40px; }
+  .profiles-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+    max-width: 900px;
+  }
+  .profile-card {
+    width: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 14px;
+    transition: transform .15s, background .15s;
+  }
+  .profile-card:hover { transform: scale(1.06); background: rgba(255,255,255,.04); }
+  .avatar {
+    width: 90px; height: 90px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #1a2a3a, #0d1520);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.4rem;
+    border: 2px solid transparent;
+    margin-bottom: 10px;
+  }
+  .profile-card.blocked .avatar { opacity: .4; filter: grayscale(1); }
+  .profile-name { font-size: .9rem; font-weight: 600; text-align: center; }
+  .profile-badge { font-size: .65rem; color: var(--accent2); margin-top: 2px; }
+  .profile-blocked-label { font-size: .65rem; color: #ff4466; margin-top: 2px; }
+
+  .add-card .avatar { border: 2px dashed var(--muted); background: transparent; color: var(--muted); }
+  .add-card .profile-name { color: var(--muted); }
+
+  .empty-msg { color: var(--muted); text-align: center; margin-top: 40px; }
+
+  /* Modal de PIN */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.7);
+    align-items: center; justify-content: center;
+    z-index: 10;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    padding: 30px;
+    border-radius: 16px;
+    width: 300px;
+    text-align: center;
+  }
+  .modal input {
+    width: 100%;
+    padding: 12px;
+    margin: 16px 0;
+    background: #0d1220;
+    border: 1px solid #2a3450;
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1.4rem;
+    text-align: center;
+    letter-spacing: 6px;
+  }
+  .modal button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .modal .cancel {
+    background: transparent;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+  .error-text { color: #ff4466; font-size: .8rem; min-height: 18px; margin-top: 4px; }
+
+  .welcome {
+    display: none;
+    text-align: center;
+    margin-top: 60px;
+  }
+  .welcome.open { display: block; }
+  .welcome h2 { font-size: 1.6rem; }
+  .welcome p { color: var(--muted); }
+</style>
+</head>
+<body>
+
+  <div class="logo">MAXTV</div>
+  <div class="subtitle">¿Quién está viendo?</div>
+
+  <div class="profiles-grid" id="profilesGrid"></div>
+  <div class="empty-msg" id="emptyMsg" style="display:none">Aún no hay perfiles creados.</div>
+
+  <div class="welcome" id="welcomeBox">
+    <h2 id="welcomeTitle"></h2>
+    <p>Sesión iniciada correctamente. Ya puedes cerrar esta pantalla o continuar navegando.</p>
+  </div>
+
+  <!-- Modal PIN -->
+  <div class="modal-overlay" id="pinModal">
+    <div class="modal">
+      <div id="pinProfileName" style="font-weight:700; margin-bottom:6px;"></div>
+      <div style="color:var(--muted); font-size:.8rem;">Ingresa tu PIN</div>
+      <input type="password" id="pinInput" maxlength="4" inputmode="numeric" autofocus>
+      <div class="error-text" id="pinError"></div>
+      <button onclick="confirmarPin()">Entrar</button>
+      <button class="cancel" onclick="cerrarModal()">Cancelar</button>
+    </div>
+  </div>
+
+<script>
+  const API_BASE = 'https://max-tv-production-2198.up.railway.app';
+  let perfilSeleccionado = null;
+
+  async function cargarPerfiles() {
+    try {
+      const res = await fetch(`${API_BASE}/api/profiles`);
+      const perfiles = await res.json();
+      const grid = document.getElementById('profilesGrid');
+      const emptyMsg = document.getElementById('emptyMsg');
+
+      if (!Array.isArray(perfiles) || perfiles.length === 0) {
+        emptyMsg.style.display = 'block';
+        return;
+      }
+
+      grid.innerHTML = perfiles.map(p => `
+        <div class="profile-card ${p.status === 'blocked' ? 'blocked' : ''}" onclick='seleccionarPerfil(${JSON.stringify(p)})'>
+          <div class="avatar">${p.avatar || '👤'}</div>
+          <div class="profile-name">${p.name}</div>
+          ${p.kind === 'admin' ? '<div class="profile-badge">ADMIN</div>' : ''}
+          ${p.status === 'blocked' ? '<div class="profile-blocked-label">🔒 Bloqueado</div>' : ''}
+        </div>
+      `).join('');
+    } catch (err) {
+      document.getElementById('emptyMsg').textContent = 'No se pudo conectar con el servidor: ' + err.message;
+      document.getElementById('emptyMsg').style.display = 'block';
+    }
+  }
+
+  function seleccionarPerfil(perfil) {
+    if (perfil.status === 'blocked') return;
+    perfilSeleccionado = perfil;
+    document.getElementById('pinProfileName').textContent = perfil.name;
+    document.getElementById('pinInput').value = '';
+    document.getElementById('pinError').textContent = '';
+    document.getElementById('pinModal').classList.add('open');
+    document.getElementById('pinInput').focus();
+  }
+
+  function cerrarModal() {
+    document.getElementById('pinModal').classList.remove('open');
+  }
+
+  async function confirmarPin() {
+    const pin = document.getElementById('pinInput').value;
+    const errorBox = document.getElementById('pinError');
+    errorBox.textContent = 'Entrando...';
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/select-profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: localStorage.getItem('maxtv_email') || prompt('Ingresa tu correo autorizado:'),
+          profileId: perfilSeleccionado.id,
+          pin: pin || undefined
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errorBox.textContent = data.error || 'Error al entrar';
+        return;
+      }
+      localStorage.setItem('maxtv_token', data.token);
+      localStorage.setItem('maxtv_profile', JSON.stringify(data.profile));
+      document.getElementById('pinModal').classList.remove('open');
+      document.getElementById('profilesGrid').style.display = 'none';
+      document.querySelector('.subtitle').style.display = 'none';
+      const welcome = document.getElementById('welcomeBox');
+      document.getElementById('welcomeTitle').textContent = `¡Hola, ${data.profile.name}! ${data.profile.avatar || ''}`;
+      welcome.classList.add('open');
+    } catch (err) {
+      errorBox.textContent = 'Error de conexión: ' + err.message;
+    }
+  }
+
+  document.getElementById('pinInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') confirmarPin();
+  });
+
+  cargarPerfiles();
+</script>
+</body>
+</html>
