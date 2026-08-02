@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaxTV — Panel Admin</title>
+<style>
+  :root {
+    --bg: #0a0e1a; --card: #131a2e; --accent: #7c5cff; --accent2: #00d4ff;
+    --muted: #7a8199; --text: #f0f2f8; --ok: #33cc77; --bad: #ff4466;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: radial-gradient(ellipse at top, #1a2140 0%, #05070d 70%);
+    color: var(--text); font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 30px 20px;
+  }
+  .top { display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto 24px; }
+  .logo { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .badge { font-size: .75rem; color: var(--muted); }
+  .card { background: var(--card); border-radius: 14px; padding: 20px; max-width: 900px; margin: 0 auto 20px; }
+  .card h3 { margin-top: 0; font-size: 1rem; color: var(--accent2); }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.06); gap: 10px; }
+  .row:last-child { border-bottom: none; }
+  .name { font-weight: 600; }
+  .meta { font-size: .75rem; color: var(--muted); }
+  .status-ok { color: var(--ok); font-size: .8rem; }
+  .status-bad { color: var(--bad); font-size: .8rem; }
+  button.toggle {
+    padding: 6px 14px; border-radius: 20px; border: none; cursor: pointer;
+    font-size: .75rem; font-weight: 700;
+  }
+  .btn-block { background: rgba(255,68,102,.15); color: var(--bad); }
+  .btn-unblock { background: rgba(51,204,119,.15); color: var(--ok); }
+  .add-row { display: flex; gap: 8px; margin-top: 14px; }
+  .add-row input {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #2a3450;
+    background: #0d1220; color: var(--text);
+  }
+  .add-row button {
+    padding: 10px 16px; border: none; border-radius: 8px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #fff; font-weight: 700; cursor: pointer;
+  }
+  .msg { text-align: center; color: var(--muted); margin-top: 40px; }
+  .msg a { color: var(--accent2); }
+</style>
+</head>
+<body>
+
+  <div class="top">
+    <div class="logo">MAXTV · Admin</div>
+    <div class="badge" id="sessionInfo"></div>
+  </div>
+
+  <div id="noSession" class="msg" style="display:none">
+    No hay una sesión activa. <a href="perfiles.html">Entra con tu perfil primero</a>.
+  </div>
+
+  <div id="content" style="display:none">
+    <div class="card">
+      <h3>👤 Perfiles</h3>
+      <div id="profilesList"></div>
+    </div>
+
+    <div class="card">
+      <h3>✉️ Correos Autorizados</h3>
+      <div id="emailsList"></div>
+      <div class="add-row">
+        <input type="email" id="newEmail" placeholder="nuevo_correo@gmail.com">
+        <button onclick="agregarCorreo()">Agregar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const API_BASE = 'https://max-tv-production-2198.up.railway.app';
+  const token = localStorage.getItem('maxtv_token');
+  const profile = JSON.parse(localStorage.getItem('maxtv_profile') || 'null');
+
+  if (!token || !profile) {
+    document.getElementById('noSession').style.display = 'block';
+  } else {
+    document.getElementById('content').style.display = 'block';
+    document.getElementById('sessionInfo').textContent = `${profile.name} ${profile.avatar || ''}`;
+    cargarPerfiles();
+    cargarCorreos();
+  }
+
+  async function authFetch(path, opts = {}) {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...opts,
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...(opts.headers || {}) }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+    return data;
+  }
+
+  async function cargarPerfiles() {
+    const box = document.getElementById('profilesList');
+    try {
+      const perfiles = await fetch(`${API_BASE}/api/profiles`).then(r => r.json());
+      box.innerHTML = perfiles.map(p => `
+        <div class="row">
+          <div>
+            <div class="name">${p.avatar || '👤'} ${p.name} ${p.kind === 'admin' ? '<span class="status-ok">ADMIN</span>' : ''}</div>
+            <div class="meta">${p.status === 'blocked' ? '🔒 Bloqueado' : '● Activo'}</div>
+          </div>
+          <button class="toggle ${p.status === 'blocked' ? 'btn-unblock' : 'btn-block'}"
+            onclick="toggleProfile('${p.id}', '${p.status}')">
+            ${p.status === 'blocked' ? 'Desbloquear' : 'Bloquear'}
+          </button>
+        </div>
+      `).join('');
+    } catch (err) {
+      box.innerHTML = `<div class="meta">Error cargando perfiles: ${err.message}</div>`;
+    }
+  }
+
+  async function toggleProfile(id, currentStatus) {
+    const nuevo = currentStatus === 'blocked' ? 'active' : 'blocked';
+    try {
+      await authFetch(`/api/admin/profiles/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nuevo })
+      });
+      cargarPerfiles();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
+  async function cargarCorreos() {
+    const box = document.getElementById('emailsList');
+    try {
+      const correos = await authFetch('/api/admin/emails');
+      box.innerHTML = correos.map(e => `
+        <div class="row">
+          <div>
+            <div class="name">${e.email} ${e.is_admin ? '<span class="status-ok">ADMIN</span>' : ''}</div>
+            <div class="meta">${e.status === 'blocked' ? '🔒 Bloqueado' : '✓ Activo'}</div>
+          </div>
+          <button class="toggle ${e.status === 'blocked' ? 'btn-unblock' : 'btn-block'}"
+            onclick="toggleEmail('${e.id}', '${e.status}')">
+            ${e.status === 'blocked' ? 'Desbloquear' : 'Bloquear'}
+          </button>
+        </div>
+      `).join('');
+    } catch (err) {
+      box.innerHTML = `<div class="meta">Error cargando correos: ${err.message}</div>`;
+    }
+  }
+
+  async function toggleEmail(id, currentStatus) {
+    const nuevo = currentStatus === 'blocked' ? 'active' : 'blocked';
+    try {
+      await authFetch(`/api/admin/emails/${id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nuevo })
+      });
+      cargarCorreos();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
+  async function agregarCorreo() {
+    const email = document.getElementById('newEmail').value;
+    if (!email) return;
+    try {
+      await authFetch('/api/admin/emails', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+      document.getElementById('newEmail').value = '';
+      cargarCorreos();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+</script>
+</body>
+</html>
