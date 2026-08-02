@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Crear primer perfil - MaxTV</title>
+<style>
+  body { font-family: sans-serif; background: #111; color: #eee; padding: 40px; }
+  input { display: block; margin: 10px 0; padding: 10px; width: 300px; }
+  button { padding: 10px 20px; background: #6c4de0; color: white; border: none; cursor: pointer; }
+  pre { background: #222; padding: 15px; margin-top: 20px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+  <h2>Crear tu primer perfil MaxTV</h2>
+  <input id="name" placeholder="Tu nombre (ej: Maxwell)" value="Maxwell">
+  <input id="avatar" placeholder="Emoji avatar (ej: 👑)" value="👑">
+  <input id="pin" placeholder="PIN (4 dígitos, opcional)" maxlength="4">
+  <button onclick="crear()">Crear perfil</button>
+  <pre id="resultado"></pre>
+
+  <script>
+    async function crear() {
+      const name = document.getElementById('name').value;
+      const avatar = document.getElementById('avatar').value;
+      const pin = document.getElementById('pin').value;
+      const res = document.getElementById('resultado');
+      res.textContent = 'Creando...';
+      try {
+        const r = await fetch('https://max-tv-production-2198.up.railway.app/api/bootstrap/first-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, avatar, pin: pin || undefined })
+        });
+        const data = await r.json();
+        res.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        res.textContent = 'Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
